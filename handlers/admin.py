@@ -68,8 +68,9 @@ async def add_operator(callback: CallbackQuery, db: Session, state: FSMContext):
         return
 
     await callback.message.answer(
-        "Чтобы добавить нового оператора, попросите пользователя написать боту команду /start "
-        "и отправить вам свой username (@username)."
+        "Чтобы добавить нового оператора(если они еще не пользовался ботом) - нужно чтобы он написал команду /start, "
+        "а после администратор передала сюда"
+        "username (@username)."
     )
     await state.set_state(AdminStates.waiting_operator_username)
     await callback.answer()
@@ -113,7 +114,7 @@ async def ask_operator_to_remove(callback: CallbackQuery, state: FSMContext, db:
         )
         await callback.message.answer(
             f"👮‍♂️ Операторы:\n\n{operator_list}\n\n"
-            "Введите username (без @) или tg_id оператора, которого хотите понизить до пользователя:"
+            "Введите username или tg_id оператора, которого хотите понизить до пользователя:"
         )
         await state.set_state(AdminStates.waiting_operator_removal_username)
     except Exception as e:

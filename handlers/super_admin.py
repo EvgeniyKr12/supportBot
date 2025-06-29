@@ -24,7 +24,11 @@ async def add_admin(callback: CallbackQuery, state: FSMContext, db: Session):
         await callback.answer()
         return
 
-    await callback.message.answer("Введите username или tg_id пользователя, чтобы назначить его администратором:")
+    await callback.message.answer("Чтобы добавить нового оператора(если они еще не "
+                                  "пользовался ботом) - нужно чтобы он написал команду "
+                                  "/start, а после администратор передала сюда"
+                                  "username (@username) или tg_id пользователя, "
+                                  "чтобы назначить его администратором:")
     await state.set_state(AdminStates.waiting_admin_username)
     await callback.answer()
 
@@ -76,7 +80,7 @@ async def ask_admin_to_remove(callback: CallbackQuery, state: FSMContext, db: Se
         )
         await callback.message.answer(
             f"👑 Администраторы:\n\n{admin_list}\n\n"
-            "Введите username (без @) или tg_id администратора, которого хотите понизить до пользователя:"
+            "Введите username с @ или tg_id администратора, которого хотите понизить до пользователя:"
         )
         await state.set_state(AdminStates.waiting_admin_removal_username)
     except Exception as e:
