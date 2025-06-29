@@ -5,3 +5,4 @@ package-mode = false
 python = "^3.13"
 aiogram = "^3.0.0"
 SQLAlchemy = "^2.0.0"
+black = "^25.1.0"
