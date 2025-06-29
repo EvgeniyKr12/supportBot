@@ -35,7 +35,7 @@ class DialogService:
             print(f"❌ Ошибка: {e} - get_dialog_by_operator")
             raise
 
-    def get_active_dialogs(self) -> list[Dialog]:
+    def get_active_dialogs(self) -> list[type[Dialog]]:
         """Возвращает все активные диалоги"""
         try:
             return self.session.query(Dialog).filter(Dialog.is_active == True).all()

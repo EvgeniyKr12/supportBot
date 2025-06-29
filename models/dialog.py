@@ -1,17 +1,13 @@
 from datetime import datetime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, Boolean, DateTime
+from .base import Base
 
-
-Base = declarative_base()
 
 class Dialog(Base):
-    __tablename__ = "dialogs"
-
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, nullable=False) # ID пользователя в Telegram
-    operator_id = Column(Integer, nullable=True) # ID оператора
-    username = Column(String(50), nullable=True)  # @username (опционально)
-    question = Column(String(500))  # Вопрос от пользователя
-    is_active = Column(Boolean, default=True)  # Активен ли диалог
-    created_at = Column(DateTime, default=datetime.now)  # Время создания
+    user_id: Mapped[int] = mapped_column(nullable=False)  # ID пользователя в Telegram
+    operator_id: Mapped[int | None] = mapped_column(nullable=True)  # ID оператора
+    username: Mapped[str | None] = mapped_column(String(50), nullable=True)  # @username
+    question: Mapped[str] = mapped_column(String(500))  # Вопрос от пользователя
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)  # Активен ли диалог
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)  # Дата создания
