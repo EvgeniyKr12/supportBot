@@ -2,20 +2,45 @@ from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.filters import Command
 from sqlalchemy.orm import Session
+from keyboards.admin.replyKeyboard import get_on_start_kb
+from models.user import User
 from services.matcher import find_answers
 from services.dialog_service import DialogService
+from services.user import get_user_by_tg_id
 from utils.notify_admin import notify_admins
-from config.constants import GREETING_TEXT, ADMIN_IDS
-
+from config.constants import ADMIN_IDS, load_greeting_text
 
 router = Router()
 
+
 @router.message(Command("start"))
-async def start(message: Message):
-    if message.from_user.id in ADMIN_IDS:
+async def start(message: Message, db: Session):
+    user = await get_user_by_tg_id(message.from_user.id, db)
+
+    if user is None:
+        new_user = User(
+            tg_id=message.from_user.id,
+            username=message.from_user.username,
+            role='user'
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        user = new_user
+
+    if user.role == 'admin':
+        await message.answer(text="Добро пожаловать, вы админ", reply_markup=get_on_start_kb())
+        return
+    elif user.role == 'super-admin':
+        await message.answer(text="Добро пожаловать, вы супер-админ", reply_markup=get_on_start_kb())
         return
 
-    await message.answer(GREETING_TEXT)
+    if user.role == "operator":
+        await message.answer(text="Добро пожаловать, вы оператор. Ожидайте вопрос")
+        return
+
+    await message.answer(load_greeting_text())
+
 
 @router.message(F.text)
 async def handle_question(message: Message, bot, db: Session):
