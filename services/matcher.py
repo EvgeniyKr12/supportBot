@@ -1,5 +1,6 @@
 import json
 from difflib import SequenceMatcher
+
 from config.constants import QUESTIONS_PATH
 
 
@@ -9,16 +10,12 @@ def find_answers(user_question: str, threshold: float = 0.7):
 
     for question, answer in questions.items():
         similarity = SequenceMatcher(
-            None,
-            user_question.lower(),
-            question.lower()
+            None, user_question.lower(), question.lower()
         ).ratio()
 
         if similarity >= threshold:
-            matches.append({
-                "question": question,
-                "answer": answer,
-                "similarity": similarity
-            })
+            matches.append(
+                {"question": question, "answer": answer, "similarity": similarity}
+            )
 
     return matches

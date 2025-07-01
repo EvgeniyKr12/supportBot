@@ -1,15 +1,7 @@
 import json
 import os
 import pathlib
-from aiogram.fsm.state import State, StatesGroup
 
-
-class DialogStates(StatesGroup):
-    WAITING_OPERATOR = State()
-    OPERATOR_ACTIVE = State()
-
-
-ADMIN_IDS = [1153721011]
 BASE_DIR = pathlib.Path(__file__).parent.parent
 QUESTIONS_PATH = BASE_DIR / "data" / "questions.json"
 GREETING_PATH = BASE_DIR / "data" / "greeting_text.txt"

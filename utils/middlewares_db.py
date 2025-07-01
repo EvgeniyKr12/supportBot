@@ -1,4 +1,5 @@
-from typing import Callable, Awaitable, Dict, Any
+from typing import Any, Awaitable, Callable, Dict
+
 from aiogram import BaseMiddleware
 from sqlalchemy.orm import Session
 
@@ -11,7 +12,7 @@ class DbSessionMiddleware(BaseMiddleware):
         self,
         handler: Callable[[Any, Dict[str, Any]], Awaitable[Any]],
         event,
-        data: Dict[str, Any]
+        data: Dict[str, Any],
     ) -> Any:
         db: Session = self.session_factory()
         try:

@@ -1,5 +1,6 @@
-from models.dialog import Dialog
 from sqlalchemy.orm import Session
+
+from models.dialog import Dialog
 
 
 class DialogService:
@@ -10,10 +11,7 @@ class DialogService:
         """Добавляет новый диалог в БД"""
         try:
             dialog = Dialog(
-                user_id=user_id,
-                username=username,
-                question=question,
-                is_active=True
+                user_id=user_id, username=username, question=question, is_active=True
             )
             self.session.add(dialog)
             self.session.commit()
@@ -27,10 +25,11 @@ class DialogService:
     def get_dialog_by_operator(self, operator_id: int):
         """Возвращает активный диалог оператора"""
         try:
-            return self.session.query(Dialog).filter(
-                Dialog.operator_id == operator_id,
-                Dialog.is_active == True
-            ).first()
+            return (
+                self.session.query(Dialog)
+                .filter(Dialog.operator_id == operator_id, Dialog.is_active == True)
+                .first()
+            )
         except Exception as e:
             print(f"❌ Ошибка: {e} - get_dialog_by_operator")
             raise
@@ -55,10 +54,11 @@ class DialogService:
     def get_dialog_by_user_id(self, user_id: int):
         """Получает активный диалог по ID пользователя"""
         try:
-            return self.session.query(Dialog).filter(
-                Dialog.user_id == user_id,
-                Dialog.is_active == True
-            ).first()
+            return (
+                self.session.query(Dialog)
+                .filter(Dialog.user_id == user_id, Dialog.is_active == True)
+                .first()
+            )
         except Exception as e:
             print(f"❌ Ошибка при получении диалога пользователя: {e}")
             self.session.rollback()
@@ -67,10 +67,11 @@ class DialogService:
     def close_dialog(self, user_id: int):
         """Закрывает диалог по user_id"""
         try:
-            dialog = self.session.query(Dialog).filter(
-                Dialog.user_id == user_id,
-                Dialog.is_active == True
-            ).first()
+            dialog = (
+                self.session.query(Dialog)
+                .filter(Dialog.user_id == user_id, Dialog.is_active == True)
+                .first()
+            )
             if dialog:
                 dialog.is_active = False
                 dialog.operator_id = None

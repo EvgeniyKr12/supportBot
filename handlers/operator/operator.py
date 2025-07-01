@@ -1,12 +1,12 @@
-from aiogram import Router, F
-from sqlalchemy.orm import Session
-from config.constants import ADMIN_IDS
-from aiogram.types import Message, CallbackQuery
-from services.dialog_service import DialogService
+from aiogram import F, Router
+from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from sqlalchemy.orm import Session
 
+from services import DialogService, UserService
 
 router = Router()
+
 
 @router.callback_query(F.data.startswith("take_dialog_"))
 async def take_dialog(callback: CallbackQuery, bot, db: Session):
@@ -29,13 +29,16 @@ async def take_dialog(callback: CallbackQuery, bot, db: Session):
     builder = InlineKeyboardBuilder()
     builder.button(text="🔒 Закрыть диалог", callback_data=f"close_dialog_{dialog.id}")
 
-    await bot.send_message(user_id,"👨💼 Оператор подключился к диалогу. Можете задавать вопросы!")
+    await bot.send_message(
+        user_id, "👨💼 Оператор подключился к диалогу. Можете задавать вопросы!"
+    )
     await callback.message.edit_text(
         f"✅ Вы взяли диалог с пользователем ID: {user_id}\n"
         f"Вопрос: {dialog.question}\n\n"
         "Отправляйте сообщения - они будут пересланы пользователю.",
-        reply_markup=builder.as_markup()
+        reply_markup=builder.as_markup(),
     )
+
 
 @router.callback_query(F.data.startswith("close_dialog_"))
 async def close_dialog_handler(callback: CallbackQuery, bot, db: Session):
@@ -52,11 +55,18 @@ async def close_dialog_handler(callback: CallbackQuery, bot, db: Session):
     await callback.message.edit_text("✅ Диалог успешно закрыт", reply_markup=None)
     await callback.answer()
 
-    await bot.send_message(dialog.user_id, "❌ Диалог с оператором завершен. Если у вас новый вопрос — просто напишите снова.")
+    await bot.send_message(
+        dialog.user_id,
+        "❌ Диалог с оператором завершен. Если у вас новый вопрос — просто напишите снова.",
+    )
+
 
 @router.message(F.text)
 async def operator_response(message: Message, bot, db: Session):
-    if message.from_user.id not in ADMIN_IDS:
+    user_service = UserService(db)
+    privileged_users = user_service.get_privileged_users()
+
+    if message.from_user.id not in privileged_users:
         return
 
     dialog_service = DialogService(db)

@@ -1,6 +1,8 @@
 from datetime import datetime
+
+from sqlalchemy import Boolean, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, Boolean, DateTime
+
 from .base import Base
 
 
@@ -10,4 +12,6 @@ class Dialog(Base):
     username: Mapped[str | None] = mapped_column(String(50), nullable=True)  # @username
     question: Mapped[str] = mapped_column(String(500))  # Вопрос от пользователя
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)  # Активен ли диалог
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)  # Дата создания
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now
+    )  # Дата создания

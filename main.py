@@ -1,17 +1,16 @@
 import asyncio
+import logging
 import sys
-from models.base import Base
-from models.user import User
-from models.dialog import Dialog
-from config.config import token
-from handlers import user, operator, admin, super_admin
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
-from utils.middlewares_db import DbSessionMiddleware
-import logging
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
+from config.config import token
+from handlers import main_router
+from models import Base, Dialog, Direction, User
+from utils.middlewares_db import DbSessionMiddleware
 
 engine = create_engine("sqlite:///data/database.db")
 Base.metadata.create_all(engine)
@@ -24,10 +23,7 @@ dp.message.middleware(DbSessionMiddleware(SessionLocal))
 dp.callback_query.middleware(DbSessionMiddleware(SessionLocal))
 
 
-dp.include_router(super_admin.router)
-dp.include_router(admin.router)
-dp.include_router(user.router)
-dp.include_router(operator.router)
+dp.include_router(main_router)
 
 
 def print_startup():
