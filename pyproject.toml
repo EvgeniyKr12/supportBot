@@ -6,3 +6,14 @@ python = "^3.13"
 aiogram = "^3.0.0"
 SQLAlchemy = "^2.0.0"
 black = "^25.1.0"
+isort = "^6.0.1"
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+skip-string-normalization = true
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
