@@ -1,6 +1,11 @@
 from aiogram.fsm.state import State, StatesGroup
 
 
+class DialogStates(StatesGroup):
+    WAITING_OPERATOR = State()
+    OPERATOR_ACTIVE = State()
+
+
 class AdminStates(StatesGroup):
     waiting_for_new_greeting = State()
     waiting_operator_username = State()
