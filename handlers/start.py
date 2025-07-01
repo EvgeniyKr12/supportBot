@@ -1,4 +1,4 @@
-from aiogram import Router, F
+from aiogram import Router
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 from sqlalchemy.orm import Session
@@ -37,7 +37,7 @@ async def start(message: Message, db: Session):
         elif user.role == UserRole.SUPER_ADMIN:
             await message.answer(
                 text="Добро пожаловать, вы супер-админ",
-                reply_markup=get_admin_kb()
+                reply_markup=get_admin_kb(True)
             )
         elif user.role == UserRole.OPERATOR:
             await message.answer(
