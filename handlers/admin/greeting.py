@@ -1,29 +1,30 @@
+from typing import Union
+
 from aiogram import F, Router
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.orm import Session
 
 from config.constants import set_new_greeting
 from data.state import AdminStates
-from services import UserService
-from utils.access import is_admin
-
+from keyboards.admin.replyKeyboard import ReplyButtonText
+from utils.access import check_admin_access
 
 router = Router()
 
 
 @router.callback_query(F.data == "change_greeting")
-async def change_greeting_text(callback: CallbackQuery, db: Session, state: FSMContext):
-    user_service = UserService(db)
-    user = user_service.get_user(callback.from_user.id)
-    if not is_admin(user):
-        await callback.message.answer("❌ У вас нет доступа.")
-        await callback.answer()
+@router.message(F.text == ReplyButtonText.CHANGE_GREETING)
+@router.message(Command("change_greeting"))
+async def change_greeting_message(
+    update: Union[CallbackQuery, Message], db: Session, state: FSMContext
+):
+    if not await check_admin_access(update, db):
         return
 
-    await callback.message.answer("✏️ Введите новое приветственное сообщение:")
+    await update.answer(text="✏️ Введите новое приветственное сообщение:")
     await state.set_state(AdminStates.waiting_for_new_greeting)
-    await callback.answer()
 
 
 @router.message(AdminStates.waiting_for_new_greeting)
