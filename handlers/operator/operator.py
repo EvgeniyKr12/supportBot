@@ -1,8 +1,10 @@
-from aiogram import F, Router, Bot
+from html import escape
+
+from aiogram import Bot, F, Router
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.orm import Session
-from html import escape
+
 from services import DialogService, UserService
 from utils.logger import logger
 
@@ -88,7 +90,7 @@ async def operator_response(message: Message, bot: Bot, db: Session):
             await bot.send_message(
                 chat_id=dialog.user_id,
                 text=f"👨💼 Оператор:\n\n{escape(message.text)}",
-                parse_mode="HTML"
+                parse_mode="HTML",
             )
             await message.answer("✅ Сообщение отправлено пользователю")
         except Exception as e:

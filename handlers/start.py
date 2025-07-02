@@ -1,8 +1,8 @@
 from typing import Union
 
-from aiogram import Router, F
+from aiogram import F, Router
 from aiogram.filters import CommandStart
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import CallbackQuery, Message
 from sqlalchemy.orm import Session
 
 from config.constants import load_greeting_text
@@ -41,7 +41,8 @@ async def start(message: Message, db: Session):
             )
         elif user.role == UserRole.SUPER_ADMIN:
             await message.answer(
-                text="Добро пожаловать, вы супер-админ", reply_markup=get_manager_kb(True)
+                text="Добро пожаловать, вы супер-админ",
+                reply_markup=get_manager_kb(True),
             )
         elif user.role == UserRole.OPERATOR:
             await message.answer(text="Добро пожаловать, вы оператор. Ожидайте вопрос")

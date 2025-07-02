@@ -1,10 +1,11 @@
+from typing import Any, Callable, List
+
 from aiogram.types import (
-    KeyboardButton,
-    ReplyKeyboardMarkup,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
 )
-from typing import Callable, Any, List
 
 
 def build_reply_kb(

@@ -1,8 +1,8 @@
 from aiogram import Router
 
+from .direction import router as direction_router
 from .greeting import router as greet_router
 from .operator import router as operator_router
-from .direction import router as direction_router
 from .question import router as question_router
 
 router = Router()

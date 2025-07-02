@@ -7,11 +7,11 @@ from aiogram.types import CallbackQuery, Message
 from sqlalchemy.orm import Session
 
 from data.state import AdminStates
+from keyboards.admin.reply.operator import get_operator_management_kb
 from keyboards.admin.text import ButtonText
 from models import UserRole
 from services import UserService
 from utils.access import check_admin_access
-from keyboards.admin.reply.operator import get_operator_management_kb
 from utils.logger import logger
 
 router = Router()

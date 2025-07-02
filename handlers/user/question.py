@@ -1,4 +1,4 @@
-from aiogram import F, Router, Bot
+from aiogram import Bot, F, Router
 from aiogram.types import Message
 from sqlalchemy.orm import Session
 

@@ -10,7 +10,7 @@ __all__ = [
     "start_router",
     "super_admin_router",
     "user_router",
-    "routers"
+    "routers",
 ]
 
 routers = [super_admin_router, admin_router, start_router, operator_router, user_router]

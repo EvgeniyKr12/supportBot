@@ -27,5 +27,5 @@ def get_admin_management_kb():
             [ButtonText.Admin.LIST],
             [ButtonText.Admin.BACK],
         ],
-        placeholder="Выберите действие с оператором 👇"
+        placeholder="Выберите действие с оператором 👇",
     )

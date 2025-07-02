@@ -143,7 +143,7 @@ async def remove_question_handler(
 
         await message.answer(
             f"📋 Вопросы:\n\n{text_list}\n\nВведите номер вопроса, который хотите удалить:",
-            reply_markup=get_question_management_kb()
+            reply_markup=get_question_management_kb(),
         )
         await state.set_state(AdminStates.waiting_for_question_removal)
     except Exception as e:
@@ -177,7 +177,7 @@ async def remove_question(message: Message, state: FSMContext):
             save_questions(questions)
             await message.answer(
                 f"✅ Вопрос №{index + 1} удалён.",
-                reply_markup=get_question_management_kb()
+                reply_markup=get_question_management_kb(),
             )
         else:
             await message.answer("❌ Вопрос уже удалён или не найден.")
@@ -185,4 +185,3 @@ async def remove_question(message: Message, state: FSMContext):
         await message.answer(f"❌ Ошибка удаления: {str(e)}")
     finally:
         await state.clear()
-

@@ -1,5 +1,5 @@
 from typing import Union
-from utils.logger import logger
+
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -13,7 +13,7 @@ from keyboards.admin.reply.direction import get_direction_management_kb
 from keyboards.admin.text import ButtonText
 from services import DirectionService
 from utils.access import check_admin_access
-
+from utils.logger import logger
 
 router = Router()
 
@@ -21,14 +21,18 @@ router = Router()
 @router.callback_query(F.data == "direction_management")
 @router.message(F.text == ButtonText.AdminMenu.DIRECTION_PANEL)
 @router.message(Command("directions"))
-async def direction_panel_handler(update: Union[CallbackQuery, Message], db: Session,):
+async def direction_panel_handler(
+    update: Union[CallbackQuery, Message],
+    db: Session,
+):
     logger.info("Управление направлениями")
     if not await check_admin_access(update, db):
         return
 
     message = update.message if isinstance(update, CallbackQuery) else update
     await message.answer(
-        text=ButtonText.AdminMenu.DIRECTION_PANEL, reply_markup=get_direction_management_kb()
+        text=ButtonText.AdminMenu.DIRECTION_PANEL,
+        reply_markup=get_direction_management_kb(),
     )
 
     if isinstance(update, CallbackQuery):
@@ -39,7 +43,9 @@ async def direction_panel_handler(update: Union[CallbackQuery, Message], db: Ses
 @router.message(F.text == ButtonText.Direction.ADD)
 @router.message(Command("add_direction"))
 async def add_direction_handler(
-    update: Union[CallbackQuery, Message], state: FSMContext, db: Session,
+    update: Union[CallbackQuery, Message],
+    state: FSMContext,
+    db: Session,
 ):
     logger.info("Добавление направления")
     if not await check_admin_access(update, db):
@@ -172,7 +178,10 @@ async def execute_remove_direction(callback: CallbackQuery, db: Session):
 @router.callback_query(F.data == "show_directions")
 @router.message(F.text == ButtonText.Direction.LIST)
 @router.message(Command("list_directions"))
-async def list_directions_handler(update: Union[CallbackQuery, Message], db: Session,):
+async def list_directions_handler(
+    update: Union[CallbackQuery, Message],
+    db: Session,
+):
     logger.info("Список направлений")
     if not await check_admin_access(update, db):
         return
