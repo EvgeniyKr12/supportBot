@@ -1,6 +1,9 @@
 from enum import Enum
-from sqlalchemy import Enum as SqlEnum, ForeignKey, String
+
+from sqlalchemy import Enum as SqlEnum
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from .base import Base
 
 
@@ -14,7 +17,7 @@ class UserRole(str, Enum):
     USER = "user"
     OPERATOR = "operator"
     ADMIN = "admin"
-    SUPER_ADMIN = "super-admin"
+    SUPER_ADMIN = "SUPER_ADMIN"
 
 
 class User(Base):

@@ -1,11 +1,12 @@
-from aiogram import F, Router
+from aiogram import F, Router, Bot
 from aiogram.types import Message
 from sqlalchemy.orm import Session
+
+from keyboards.user.inlineKeyboard import choose_user_status
 from services import UserService
 from services.dialog_service import DialogService
 from services.matcher import find_answers
 from utils.notify_admin import notify_admins
-
 
 router = Router()
 
@@ -15,7 +16,7 @@ def is_access(user):
 
 
 @router.message(F.text)
-async def handle_question(message: Message, bot, db: Session):
+async def handle_question(message: Message, bot: Bot, db: Session):
     user_service = UserService(db)
     user = user_service.get_user(message.from_user.id)
 

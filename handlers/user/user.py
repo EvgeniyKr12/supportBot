@@ -10,16 +10,18 @@ from services import UserService
 router = Router()
 
 
+@router.callback_query(F.data == "about_university")
 @router.message(F.text == ReplyButtonText.ABOUT_UNIVERSITY)
-@router.message(Command(ReplyButtonText.ABOUT_UNIVERSITY))
+@router.message(Command("about_university"))
 async def about_university_handler(message: Message):
     await message.answer(
         "🏫 ИСТ «Т-университет» — это инновационная образовательная платформа..."
     )
 
 
+@router.callback_query(F.data == "show_programs")
 @router.message(F.text == ReplyButtonText.EDUCATIONAL_PROGRAMS)
-@router.message(Command(ReplyButtonText.EDUCATIONAL_PROGRAMS))
+@router.message(Command('show_programs'))
 async def educational_programs_handler(message: Message):
     await message.answer(
         "📚 Программы обучения:\n- Программа 1\n- Программа 2\n- Программа 3"

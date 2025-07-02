@@ -1,10 +1,9 @@
 from aiogram import F, Router
 from aiogram.types import CallbackQuery
 from sqlalchemy.orm import Session
-from config.constants import load_greeting_text
+
 from keyboards.user.inlineKeyboard import choose_direction, confirm_direction_keyboard
 from services import DirectionService, UserService
-
 
 router = Router()
 

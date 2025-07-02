@@ -7,12 +7,10 @@ from aiogram.types import CallbackQuery, Message
 from sqlalchemy.orm import Session
 
 from data.state import AdminStates
-from keyboards.admin.inlineKeyboard import (
-    DirectionButtonText,
-    get_confirmation_kb,
-    get_direction_management_kb,
-    get_directions_list_kb,
-)
+from keyboards.admin.base import get_confirmation_kb
+from keyboards.admin.inline.inline import get_directions_list_kb
+from keyboards.admin.reply.direction import get_direction_management_kb
+from keyboards.admin.text import ButtonText
 from services import DirectionService
 from utils.access import check_admin_access
 
@@ -21,7 +19,7 @@ router = Router()
 
 
 @router.callback_query(F.data == "direction_management")
-@router.message(F.text == DirectionButtonText.DIRECTION_PANEL)
+@router.message(F.text == ButtonText.AdminMenu.DIRECTION_PANEL)
 @router.message(Command("directions"))
 async def direction_panel_handler(update: Union[CallbackQuery, Message], db: Session):
     if not await check_admin_access(update, db):
@@ -29,7 +27,7 @@ async def direction_panel_handler(update: Union[CallbackQuery, Message], db: Ses
 
     message = update.message if isinstance(update, CallbackQuery) else update
     await message.answer(
-        text=DirectionButtonText.DIRECTION_PANEL, reply_markup=get_direction_management_kb()
+        text=ButtonText.AdminMenu.DIRECTION_PANEL, reply_markup=get_direction_management_kb()
     )
 
     if isinstance(update, CallbackQuery):
@@ -37,7 +35,7 @@ async def direction_panel_handler(update: Union[CallbackQuery, Message], db: Ses
 
 
 @router.callback_query(F.data == "add_direction")
-@router.message(F.text == DirectionButtonText.ADD_DIRECTION)
+@router.message(F.text == ButtonText.Direction.ADD)
 @router.message(Command("add_direction"))
 async def add_direction_handler(
     update: Union[CallbackQuery, Message], state: FSMContext, db: Session
@@ -99,7 +97,7 @@ async def save_new_direction(message: Message, state: FSMContext, db: Session):
 
 
 @router.callback_query(F.data == "remove_direction")
-@router.message(F.text == DirectionButtonText.REMOVE_DIRECTION)
+@router.message(F.text == ButtonText.Direction.REMOVE)
 @router.message(Command("remove_direction"))
 async def remove_direction_handler(update: Union[CallbackQuery, Message], db: Session):
     if not await check_admin_access(update, db):
@@ -169,7 +167,7 @@ async def execute_remove_direction(callback: CallbackQuery, db: Session):
 
 
 @router.callback_query(F.data == "show_directions")
-@router.message(F.text == DirectionButtonText.SHOW_DIRECTIONS)
+@router.message(F.text == ButtonText.Direction.LIST)
 @router.message(Command("list_directions"))
 async def list_directions_handler(update: Union[CallbackQuery, Message], db: Session):
     if not await check_admin_access(update, db):
@@ -195,6 +193,7 @@ async def list_directions_handler(update: Union[CallbackQuery, Message], db: Ses
         await message.answer(
             f"📚 Список направлений:\n\n{directions_list}",
             reply_markup=get_direction_management_kb(),
+            parse_mode="HTML",
         )
     except Exception as e:
         await message.answer(f"❌ Ошибка: {str(e)}")
