@@ -181,10 +181,9 @@ async def execute_remove_direction(callback: CallbackQuery, db: Session):
 async def list_directions_handler(
     update: Union[CallbackQuery, Message],
     db: Session,
+    admin: bool = True,
 ):
     logger.info("Список направлений")
-    if not await check_admin_access(update, db):
-        return
 
     direction_service = DirectionService(db)
     message = update.message if isinstance(update, CallbackQuery) else update
@@ -203,11 +202,18 @@ async def list_directions_handler(
             for d in directions
         )
 
-        await message.answer(
-            f"📚 Список направлений:\n\n{directions_list}",
-            reply_markup=get_direction_management_kb(),
-            parse_mode="HTML",
-        )
+        if not admin:
+            await message.answer(
+                text=f"📚 Список направлений:\n\n{directions_list}",
+                parse_mode="HTML",
+            )
+        else:
+            await message.answer(
+                text=f"📚 Список направлений:\n\n{directions_list}",
+                reply_markup=get_direction_management_kb(),
+                parse_mode="HTML",
+            )
+
     except Exception as e:
         await message.answer(f"❌ Ошибка: {str(e)}")
 

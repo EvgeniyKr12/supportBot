@@ -13,4 +13,4 @@ __all__ = [
     "routers",
 ]
 
-routers = [super_admin_router, admin_router, start_router, operator_router, user_router]
+routers = [super_admin_router, admin_router, start_router, user_router, operator_router]
