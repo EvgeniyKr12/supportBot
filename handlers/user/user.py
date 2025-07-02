@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy.orm import Session
 
+from handlers.admin.direction import list_directions_handler
 from keyboards.user.inlineKeyboard import choose_user_status
 from keyboards.user.replyKeyboard import ReplyButtonText
 from services import UserService
@@ -24,11 +25,9 @@ async def about_university_handler(message: Message):
 @router.callback_query(F.data == "show_programs")
 @router.message(F.text == ReplyButtonText.EDUCATIONAL_PROGRAMS)
 @router.message(Command('show_programs'))
-async def educational_programs_handler(message: Message):
+async def educational_programs_handler(message: Message, db: Session):
     logger.info("Пользователь запрашивает информацию о направлениях")
-    await message.answer(
-        "📚 Программы обучения:\n- Программа 1\n- Программа 2\n- Программа 3"
-    )
+    await list_directions_handler(message, db, False)
 
 
 @router.message(F.text == ReplyButtonText.CONNECTION)
