@@ -6,6 +6,7 @@ from config.constants import load_greeting_text
 from keyboards.user.inlineKeyboard import InlineButtonText, choose_direction
 from models.user import UserType
 from services import UserService
+from utils.logger import logger
 
 router = Router()
 
@@ -19,7 +20,11 @@ router = Router()
         ]
     )
 )
-async def set_user_type(callback: CallbackQuery, db: Session):
+async def set_user_type(
+    callback: CallbackQuery,
+    db: Session,
+):
+    logger.info("Пользователь выбрал тип")
     user_service = UserService(db)
     user = user_service.get_user(callback.from_user.id)
 

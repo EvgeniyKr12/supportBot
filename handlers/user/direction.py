@@ -4,12 +4,14 @@ from sqlalchemy.orm import Session
 
 from keyboards.user.inlineKeyboard import choose_direction, confirm_direction_keyboard
 from services import DirectionService, UserService
+from utils.logger import logger
 
 router = Router()
 
 
 @router.callback_query(F.data.startswith("direction_info_"))
 async def show_direction_info(callback: CallbackQuery, db: Session):
+    logger.info("Информация о направлении")
     direction_service = DirectionService(db)
     code = callback.data.split("_")[2]
     direction = direction_service.get_direction_by_code(code)
@@ -27,6 +29,7 @@ async def show_direction_info(callback: CallbackQuery, db: Session):
 
 @router.callback_query(F.data.startswith("direction_confirm_"))
 async def confirm_direction(callback: CallbackQuery, db: Session):
+    logger.info("Подтверждение направления")
     user_service = UserService(db)
     direction_service = DirectionService(db)
     code = callback.data.split("_")[2]
@@ -45,6 +48,7 @@ async def confirm_direction(callback: CallbackQuery, db: Session):
 
 @router.callback_query(F.data == "direction_back")
 async def back_to_directions(callback: CallbackQuery, db: Session):
+    logger.info("Пользователь возвращается назад")
     await callback.message.edit_text(
         "Выберите направление:", reply_markup=await choose_direction(db)
     )
@@ -53,6 +57,7 @@ async def back_to_directions(callback: CallbackQuery, db: Session):
 
 @router.callback_query(F.data == "direction_UNDECIDED")
 async def undecided_direction(callback: CallbackQuery, db: Session):
+    logger.info("Пользователь не решил с направлением")
     user_service = UserService(db)
     user = user_service.get_user(callback.from_user.id)
     user.direction_id = None

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from keyboards.user.inlineKeyboard import choose_user_status
 from keyboards.user.replyKeyboard import ReplyButtonText
 from services import UserService
+from utils.logger import logger
 
 router = Router()
 
@@ -14,6 +15,7 @@ router = Router()
 @router.message(F.text == ReplyButtonText.ABOUT_UNIVERSITY)
 @router.message(Command("about_university"))
 async def about_university_handler(message: Message):
+    logger.info("Пользователь запрашивает информацию о университете")
     await message.answer(
         "🏫 ИСТ «Т-университет» — это инновационная образовательная платформа..."
     )
@@ -23,6 +25,7 @@ async def about_university_handler(message: Message):
 @router.message(F.text == ReplyButtonText.EDUCATIONAL_PROGRAMS)
 @router.message(Command('show_programs'))
 async def educational_programs_handler(message: Message):
+    logger.info("Пользователь запрашивает информацию о направлениях")
     await message.answer(
         "📚 Программы обучения:\n- Программа 1\n- Программа 2\n- Программа 3"
     )
@@ -31,6 +34,7 @@ async def educational_programs_handler(message: Message):
 @router.message(F.text == ReplyButtonText.CONNECTION)
 @router.message(Command(ReplyButtonText.CONNECTION))
 async def connection_handler(message: Message):
+    logger.info("Пользователь запрашивает информацию о контактах")
     await message.answer(
         "📞 Контакты:\nТелефон: +7 (123) 456-78-90\nEmail: info@t-university.ru"
     )
@@ -39,6 +43,7 @@ async def connection_handler(message: Message):
 @router.message(F.text == ReplyButtonText.ASK_QUESTION)
 @router.message(Command(ReplyButtonText.ASK_QUESTION))
 async def ask_question_handler(message: Message, db: Session):
+    logger.info("Пользователь запрашивает информацию о том как задать вопрос")
     user_service = UserService(db)
     user = user_service.get_user(message.from_user.id)
 

@@ -1,5 +1,5 @@
 from typing import Union
-
+from utils.logger import logger
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -21,7 +21,8 @@ router = Router()
 @router.callback_query(F.data == "direction_management")
 @router.message(F.text == ButtonText.AdminMenu.DIRECTION_PANEL)
 @router.message(Command("directions"))
-async def direction_panel_handler(update: Union[CallbackQuery, Message], db: Session):
+async def direction_panel_handler(update: Union[CallbackQuery, Message], db: Session,):
+    logger.info("Управление направлениями")
     if not await check_admin_access(update, db):
         return
 
@@ -38,8 +39,9 @@ async def direction_panel_handler(update: Union[CallbackQuery, Message], db: Ses
 @router.message(F.text == ButtonText.Direction.ADD)
 @router.message(Command("add_direction"))
 async def add_direction_handler(
-    update: Union[CallbackQuery, Message], state: FSMContext, db: Session
+    update: Union[CallbackQuery, Message], state: FSMContext, db: Session,
 ):
+    logger.info("Добавление направления")
     if not await check_admin_access(update, db):
         return
 
@@ -100,6 +102,7 @@ async def save_new_direction(message: Message, state: FSMContext, db: Session):
 @router.message(F.text == ButtonText.Direction.REMOVE)
 @router.message(Command("remove_direction"))
 async def remove_direction_handler(update: Union[CallbackQuery, Message], db: Session):
+    logger.info("Удаление направления")
     if not await check_admin_access(update, db):
         return
 
@@ -169,7 +172,8 @@ async def execute_remove_direction(callback: CallbackQuery, db: Session):
 @router.callback_query(F.data == "show_directions")
 @router.message(F.text == ButtonText.Direction.LIST)
 @router.message(Command("list_directions"))
-async def list_directions_handler(update: Union[CallbackQuery, Message], db: Session):
+async def list_directions_handler(update: Union[CallbackQuery, Message], db: Session,):
+    logger.info("Список направлений")
     if not await check_admin_access(update, db):
         return
 

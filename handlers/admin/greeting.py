@@ -10,6 +10,7 @@ from config.constants import set_new_greeting
 from data.state import AdminStates
 from keyboards.admin.text import ButtonText
 from utils.access import check_admin_access
+from utils.logger import logger
 
 router = Router()
 
@@ -20,6 +21,7 @@ router = Router()
 async def change_greeting_message(
     update: Union[CallbackQuery, Message], db: Session, state: FSMContext
 ):
+    logger.info("Обновляем приветствие")
     if not await check_admin_access(update, db):
         return
 

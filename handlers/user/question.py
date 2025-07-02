@@ -2,21 +2,27 @@ from aiogram import F, Router, Bot
 from aiogram.types import Message
 from sqlalchemy.orm import Session
 
-from keyboards.user.inlineKeyboard import choose_user_status
+from models import UserRole
 from services import UserService
 from services.dialog_service import DialogService
 from services.matcher import find_answers
+from utils.logger import logger
 from utils.notify_admin import notify_admins
 
 router = Router()
 
 
 def is_access(user):
-    return user and user.role in ("admin", "super-admin", 'operator')
+    return user and user.role in (
+        UserRole.ADMIN,
+        UserRole.SUPER_ADMIN,
+        UserRole.OPERATOR,
+    )
 
 
 @router.message(F.text)
 async def handle_question(message: Message, bot: Bot, db: Session):
+    logger.info("Пользователь задает вопрос")
     user_service = UserService(db)
     user = user_service.get_user(message.from_user.id)
 

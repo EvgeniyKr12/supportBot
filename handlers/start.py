@@ -12,12 +12,14 @@ from keyboards.user.replyKeyboard import get_user_kb
 from models import User, UserRole
 from services.user_service import UserService
 from utils.access import check_admin_access
+from utils.logger import logger
 
 router = Router()
 
 
 @router.message(CommandStart())
 async def start(message: Message, db: Session):
+    logger.info("Бот запущен")
     user_service = UserService(db)
     user = user_service.get_user(message.from_user.id)
 
@@ -51,6 +53,7 @@ async def start(message: Message, db: Session):
 @router.message(F.text == ButtonText.Operator.BACK)
 @router.message(F.text == ButtonText.Admin.BACK)
 async def back_handler(update: Union[CallbackQuery, Message], db: Session):
+    logger.info("Возврат назад")
     if not await check_admin_access(update, db):
         return
 

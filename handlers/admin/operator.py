@@ -12,6 +12,7 @@ from models import UserRole
 from services import UserService
 from utils.access import check_admin_access
 from keyboards.admin.reply.operator import get_operator_management_kb
+from utils.logger import logger
 
 router = Router()
 
@@ -20,6 +21,7 @@ router = Router()
 @router.message(F.text == ButtonText.AdminMenu.OPERATOR_PANEL)
 @router.message(Command("operators"))
 async def operator_panel_handler(update: Union[CallbackQuery, Message], db: Session):
+    logger.info("Управление операторами")
     if not await check_admin_access(update, db):
         return
 
@@ -38,6 +40,7 @@ async def operator_panel_handler(update: Union[CallbackQuery, Message], db: Sess
 async def add_operator_handler(
     update: Union[CallbackQuery, Message], db: Session, state: FSMContext
 ):
+    logger.info("Добавление оператора")
     if not await check_admin_access(update, db):
         return
 
@@ -59,6 +62,7 @@ async def add_operator_handler(
 async def remove_operator_handler(
     update: Union[CallbackQuery, Message], db: Session, state: FSMContext
 ):
+    logger.info("Удаление оператора")
     if not await check_admin_access(update, db):
         return
 
@@ -151,6 +155,7 @@ async def remove_operator(message: Message, state: FSMContext, db: Session):
 @router.message(F.text == ButtonText.Operator.LIST)
 @router.message(Command("list_operators"))
 async def list_operators_handler(update: Union[CallbackQuery, Message], db: Session):
+    logger.info("Список операторов")
     if not await check_admin_access(update, db):
         return
 

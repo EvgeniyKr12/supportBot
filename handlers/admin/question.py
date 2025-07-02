@@ -8,10 +8,10 @@ from sqlalchemy.orm import Session
 
 from config.constants import load_questions, save_questions
 from data.state import AdminStates
-from keyboards.admin.reply.admin import get_manager_kb
 from keyboards.admin.reply.question import get_question_management_kb
 from keyboards.admin.text import ButtonText
 from utils.access import check_admin_access
+from utils.logger import logger
 
 router = Router()
 
@@ -20,6 +20,7 @@ router = Router()
 @router.message(F.text == ButtonText.AdminMenu.QUESTION_PANEL)
 @router.message(Command("questions"))
 async def question_panel_handler(update: Union[CallbackQuery, Message], db: Session):
+    logger.info("Управление вопросами")
     if not await check_admin_access(update, db):
         return
 
@@ -36,6 +37,7 @@ async def question_panel_handler(update: Union[CallbackQuery, Message], db: Sess
 @router.message(F.text == ButtonText.Question.LIST)
 @router.message(Command("list_questions"))
 async def show_questions_handler(update: Union[CallbackQuery, Message], db: Session):
+    logger.info("Список вопросов")
     if not await check_admin_access(update, db):
         return
 
@@ -67,6 +69,7 @@ async def show_questions_handler(update: Union[CallbackQuery, Message], db: Sess
 async def add_question_handler(
     update: Union[CallbackQuery, Message], state: FSMContext, db: Session
 ):
+    logger.info("Добавление вопроса")
     if not await check_admin_access(update, db):
         return
 
@@ -120,6 +123,7 @@ async def receive_answer_text(message: Message, state: FSMContext):
 async def remove_question_handler(
     update: Union[CallbackQuery, Message], state: FSMContext, db: Session
 ):
+    logger.info("Удаление вопроса")
     if not await check_admin_access(update, db):
         return
 
