@@ -8,7 +8,7 @@ from services import UserService
 
 
 def is_admin(user):
-    return user and user.role in ("admin", "super-admin")
+    return user and user.role in (UserRole.ADMIN, UserRole.SUPER_ADMIN)
 
 
 async def check_super_admin_access(update: Union[CallbackQuery, Message], db: Session):
