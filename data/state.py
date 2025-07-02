@@ -15,3 +15,4 @@ class AdminStates(StatesGroup):
     waiting_for_new_question_text = State()
     waiting_for_new_answer_text = State()
     waiting_for_question_removal = State()
+    waiting_new_direction_data = State()
