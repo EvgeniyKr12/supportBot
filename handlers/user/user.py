@@ -1,12 +1,13 @@
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from sqlalchemy.orm import Session
 
 from handlers.admin.direction import list_directions_handler
-from keyboards.user.inlineKeyboard import choose_user_status
+from keyboards.admin.inline.inline import get_about_user_inline_kb
 from keyboards.user.replyKeyboard import ReplyButtonText
-from services import UserService
+from models import UserType
+from services import UserService, DirectionService
 from utils.logger import logger
 
 router = Router()
@@ -46,12 +47,57 @@ async def ask_question_handler(message: Message, db: Session):
     user_service = UserService(db)
     user = user_service.get_user(message.from_user.id)
 
-    if not user or not user.type:
-        await message.answer(
-            "Для полноценного использования бота ответьте на вопросы.\n\n"
-            "Укажите, кем вы являетесь:",
-            reply_markup=choose_user_status(),
-        )
+    await message.answer("💬 Напишите ваш вопрос в чат, и мы ответим как можно скорее.")
+
+
+@router.message(F.text == "👨‍🎓 О вас")
+async def about_user_handler(message: Message, db: Session):
+    user_service = UserService(db)
+    direction_service = DirectionService(db)
+
+    user = user_service.get_user(message.from_user.id)
+    if not user:
+        await message.answer("❌ Пользователь не найден.")
         return
 
-    await message.answer("💬 Напишите ваш вопрос, и мы ответим как можно скорее.")
+    # Тип пользователя
+    type_map = {
+        UserType.APPLICANT: "Абитуриент",
+        UserType.PARENT: "Родитель",
+        UserType.OTHER: "Иное",
+    }
+    user_type_str = type_map.get(user.type, "Не выбран")
+
+    # Направление
+    direction = direction_service.get_direction_by_id(user.direction_id) if user.direction_id else None
+    direction_str = direction.name if direction else "Не выбрано"
+
+    text = (
+        f"🧾 <b>Информация о вас:</b>\n\n"
+        f"Никнейм: {user.username}\n"
+        f"👤 Тип: <b>{user_type_str}</b>\n"
+        f"🎯 Направление: <b>{direction_str}</b>"
+    )
+
+    await message.answer(text, reply_markup=get_about_user_inline_kb(), parse_mode="HTML")
+
+@router.callback_query(F.data == "change_type")
+async def change_type(callback: CallbackQuery):
+    from keyboards.user.inlineKeyboard import InlineButtonText
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🎓 Абитуриент", callback_data=InlineButtonText.SET_APPLICANT)
+    builder.button(text="👨‍👩‍👧 Родитель", callback_data=InlineButtonText.SET_PARENT)
+    builder.button(text="❓ Другое", callback_data=InlineButtonText.SET_OTHER)
+    builder.adjust(1)
+
+    await callback.message.edit_text("Пожалуйста, выберите, кто вы:", reply_markup=builder.as_markup())
+    await callback.answer()
+
+
+@router.callback_query(F.data == "change_direction")
+async def change_direction(callback: CallbackQuery, db: Session):
+    from keyboards.user.inlineKeyboard import choose_direction
+    await callback.message.edit_text("Пожалуйста, выберите направление:", reply_markup=await choose_direction(db))
+    await callback.answer()

@@ -1,8 +1,6 @@
 from aiogram import F, Router
 from aiogram.types import CallbackQuery
 from sqlalchemy.orm import Session
-
-from config.constants import load_greeting_text
 from keyboards.user.inlineKeyboard import InlineButtonText, choose_direction
 from models.user import UserType
 from services import UserService
@@ -33,16 +31,17 @@ async def set_user_type(
         return
 
     if callback.data == InlineButtonText.SET_APPLICANT:
-        user.user_type = UserType.APPLICANT
+        user.type = UserType.APPLICANT
         response = "✅ Вы выбрали статус: Абитуриент"
     elif callback.data == InlineButtonText.SET_PARENT:
-        user.user_type = UserType.PARENT
+        user.type = UserType.PARENT
         response = "✅ Вы выбрали статус: Родитель"
     else:
-        user.user_type = UserType.OTHER
+        user.type = UserType.OTHER
         response = "✅ Вы выбрали статус: Иное"
 
     db.commit()
+    db.refresh(user)
     await callback.answer()
     if user.direction_id is None:
         await callback.message.answer(
@@ -51,5 +50,4 @@ async def set_user_type(
         )
         return
     else:
-        await callback.message.answer(response)
-    await callback.message.answer(load_greeting_text())
+        await callback.message.answer(f"{response}\n\nТеперь вы можете задавать вопросы!")

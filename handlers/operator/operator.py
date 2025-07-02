@@ -5,7 +5,8 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.orm import Session
 
-from services import DialogService, UserService
+from models import UserType
+from services import DialogService, UserService, DirectionService
 from utils.logger import logger
 
 router = Router()
@@ -15,6 +16,14 @@ router = Router()
 async def take_dialog(callback: CallbackQuery, bot, db: Session):
     logger.info("Оператор берет диалог")
     user_id = int(callback.data.split("_")[-1])
+    user_service = UserService(db)
+    direction_service = DirectionService(db)
+    user = user_service.get_user(user_id)
+
+    direction = None
+    if user.direction_id is not None:
+        direction = direction_service.get_direction_by_id(user.direction_id)
+
     operator_id = callback.from_user.id
     dialog_service = DialogService(db)
 
@@ -36,12 +45,32 @@ async def take_dialog(callback: CallbackQuery, bot, db: Session):
     await bot.send_message(
         user_id, "👨💼 Оператор подключился к диалогу. Можете задавать вопросы!"
     )
+
+    user_type_text = None
+
+    if user.type == UserType.PARENT:
+        user_type_text = "Родитель"
+
+    if user.type == UserType.APPLICANT:
+        user_type_text = "Абитуриент"
+
+    if user.type == UserType.OTHER:
+        user_type_text = "Другое"
+
+    message_text = (
+        f"✅ Вы взяли диалог с пользователем:\n"
+        f"🆔 ID: {user.tg_id}\n"
+        f"👤 Username: @{user.username or '—'}\n"
+        f"🎯 Тип: {user_type_text if user.type else 'Не выбран'}\n"
+        f"📘 Направление: {direction.name if direction else 'Не выбрано'}\n\n"
+        f"💬 Вопрос: {dialog.question}"
+    )
+
     await callback.message.edit_text(
-        f"✅ Вы взяли диалог с пользователем ID: {user_id}\n"
-        f"Вопрос: {dialog.question}\n\n"
-        "Отправляйте сообщения - они будут пересланы пользователю.",
+        message_text,
         reply_markup=builder.as_markup(),
     )
+
 
 
 @router.callback_query(F.data.startswith("close_dialog_"))

@@ -6,6 +6,7 @@ class ReplyButtonText:
     EDUCATIONAL_PROGRAMS = "📚 Программы обучения"
     CONNECTION = "📞 Контакты"
     ASK_QUESTION = "💬 Задать вопрос"
+    ABOUT = "👨‍🎓 О вас"
 
 
 def get_user_kb():
@@ -14,6 +15,7 @@ def get_user_kb():
         [KeyboardButton(text=ReplyButtonText.EDUCATIONAL_PROGRAMS)],
         [KeyboardButton(text=ReplyButtonText.CONNECTION)],
         [KeyboardButton(text=ReplyButtonText.ASK_QUESTION)],
+        [KeyboardButton(text=ReplyButtonText.ABOUT)],
     ]
 
     markup = ReplyKeyboardMarkup(

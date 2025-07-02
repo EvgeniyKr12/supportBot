@@ -9,7 +9,7 @@ from config.constants import load_greeting_text
 from keyboards.admin.reply.admin import get_manager_kb
 from keyboards.admin.text import ButtonText
 from keyboards.user.replyKeyboard import get_user_kb
-from models import User, UserRole
+from models import UserRole
 from services.user_service import UserService
 from utils.access import check_admin_access
 from utils.logger import logger
@@ -24,15 +24,7 @@ async def start(message: Message, db: Session):
     user = user_service.get_user(message.from_user.id)
 
     if user is None:
-        new_user = User(
-            tg_id=message.from_user.id,
-            username=message.from_user.username,
-            role=UserRole.USER,
-        )
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-        user = new_user
+        user = user_service.create_user(message.from_user.id, message.from_user.username)
 
     if user.role != UserRole.USER:
         if user.role == UserRole.ADMIN:

@@ -41,7 +41,7 @@ async def confirm_direction(callback: CallbackQuery, db: Session):
     user.direction_id = direction.id
     db.commit()
     await callback.message.edit_text(
-        f"✅ Вы выбрали направление: <b>{direction.name}</b>", parse_mode="HTML"
+        f"✅ Вы выбрали направление: <b>{direction.name}</b>\n\nТеперь вы можете задавать свои вопросы", parse_mode="HTML"
     )
     await callback.answer()
 
