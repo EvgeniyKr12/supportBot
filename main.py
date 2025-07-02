@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from config.config import token
-from handlers import main_router
+from handlers import routers
 from models import Base, Dialog, Direction, User
 from utils.middlewares_db import DbSessionMiddleware
 
@@ -23,7 +23,8 @@ dp.message.middleware(DbSessionMiddleware(SessionLocal))
 dp.callback_query.middleware(DbSessionMiddleware(SessionLocal))
 
 
-dp.include_router(main_router)
+for router in routers:
+    dp.include_router(router)
 
 
 def print_startup():
