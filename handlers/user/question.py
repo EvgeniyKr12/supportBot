@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 from data.state import UserDataForm
+from handlers.operator.operator import operator_response
 from keyboards.user.inlineKeyboard import InlineButtonText, choose_direction
 from models import UserRole
 from services import UserService
@@ -24,6 +25,24 @@ def is_access(user):
 
 
 @router.message(F.text)
+async def handle_message(
+        message: Message,
+        bot: Bot,
+        db: Session,
+        state: FSMContext = None
+):
+    # Проверяем, является ли отправитель оператором
+    user_service = UserService(db)
+    privileged_users = user_service.get_privileged_users()
+
+    if message.from_user.id in [u.id for u in privileged_users]:
+        # Если это оператор - вызываем operator_response
+        await operator_response(message, bot, db)
+    else:
+        # Если это обычный пользователь - вызываем handle_question
+        await handle_question(message, bot, db, state)
+
+
 async def handle_question(message: Message, bot: Bot, db: Session, state: FSMContext):
     user_service = UserService(db)
     user = user_service.get_user(message.from_user.id)

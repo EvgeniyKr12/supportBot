@@ -26,10 +26,22 @@ async def show_direction_info(callback: CallbackQuery, db: Session):
     )
     await callback.answer()
 
+@router.callback_query(F.data == "direction_UNDECIDED")
+async def direction_undecided(callback: CallbackQuery, db: Session):
+    user_service = UserService(db)
+    user = user_service.get_user(callback.from_user.id)
+    user.direction_id = 0
+    db.commit()
+    await callback.message.edit_text(
+        f"✅ Хорошо, пока не определились с направлением. "
+        f"Можете потом изменить это в <b>профиле</b>\n\nТеперь вы "
+        f"можете задавать свои вопросы",
+        parse_mode="HTML"
+    )
 
 @router.callback_query(F.data.startswith("direction_confirm_"))
 async def confirm_direction(callback: CallbackQuery, db: Session):
-    logger.info("Подтверждение направления")
+    logger.info(f"Пользователь {callback.from_user.id} подтверждает направление")
     user_service = UserService(db)
     direction_service = DirectionService(db)
     code = callback.data.split("_")[2]
@@ -52,15 +64,4 @@ async def back_to_directions(callback: CallbackQuery, db: Session):
     await callback.message.edit_text(
         "Выберите направление:", reply_markup=await choose_direction(db)
     )
-    await callback.answer()
-
-
-@router.callback_query(F.data == "direction_UNDECIDED")
-async def undecided_direction(callback: CallbackQuery, db: Session):
-    logger.info("Пользователь не решил с направлением")
-    user_service = UserService(db)
-    user = user_service.get_user(callback.from_user.id)
-    user.direction_id = None
-    db.commit()
-    await callback.message.edit_text("Вы можете выбрать направление позже через меню")
     await callback.answer()

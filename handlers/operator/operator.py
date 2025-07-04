@@ -16,60 +16,73 @@ router = Router()
 async def take_dialog(callback: CallbackQuery, bot, db: Session):
     logger.info("Оператор берет диалог")
     user_id = int(callback.data.split("_")[-1])
+    operator_id = callback.from_user.id
+
     user_service = UserService(db)
     direction_service = DirectionService(db)
-    user = user_service.get_user(user_id)
-
-    direction = None
-    if user.direction_id is not None:
-        direction = direction_service.get_direction_by_id(user.direction_id)
-
-    operator_id = callback.from_user.id
     dialog_service = DialogService(db)
 
-    dialog = dialog_service.get_dialog_by_user_id(user_id)
-
-    if not dialog:
-        await callback.answer("Диалог уже закрыт!", show_alert=True)
+    # 1. Проверяем существование пользователя
+    user = user_service.get_user(user_id)
+    if not user:
+        await callback.answer("❌ Пользователь не найден!", show_alert=True)
         return
 
-    if dialog.operator_id:
-        await callback.answer("Диалог уже занят другим оператором!", show_alert=True)
+    # 2. Проверяем текущий диалог пользователя
+    new_dialog = dialog_service.get_dialog_by_user_id(user_id)
+    if not new_dialog:
+        await callback.answer("❌ Диалог уже закрыт!", show_alert=True)
+        return
+    if new_dialog.operator_id:
+        await callback.answer("❌ Диалог уже занят другим оператором!", show_alert=True)
         return
 
-    dialog_service.assign_operator(dialog.id, operator_id)
+    # 3. Закрываем предыдущий активный диалог оператора
+    current_dialog = dialog_service.get_dialog_by_operator(operator_id)
+    if current_dialog:
+        dialog_service.close_dialog(current_dialog.id)
+        try:
+            await bot.send_message(
+                current_dialog.user_id,
+                "❌ Оператор переключился на другой диалог. Если вам нужна помощь, задайте новый вопрос."
+            )
+        except Exception as e:
+            logger.error(f"Ошибка при уведомлении пользователя {current_dialog.user_id}: {e}")
 
-    builder = InlineKeyboardBuilder()
-    builder.button(text="🔒 Закрыть диалог", callback_data=f"close_dialog_{dialog.id}")
+    # 4. Назначаем новый диалог
+    dialog_service.assign_operator(new_dialog.id, operator_id)
 
+    # 5. Формируем информацию о пользователе
+    direction = direction_service.get_direction_by_id(user.direction_id) if user.direction_id else None
+    user_type_text = {
+        UserType.PARENT: "Родитель",
+        UserType.APPLICANT: "Абитуриент",
+        UserType.OTHER: "Другое"
+    }.get(user.type, "Не выбран")
+
+    # 6. Отправляем сообщения
     await bot.send_message(
-        user_id, "👨💼 Оператор подключился к диалогу. Можете задавать вопросы!"
+        user_id,
+        "👨💼 Оператор подключился к диалогу. Можете задавать вопросы!"
     )
-
-    user_type_text = None
-
-    if user.type == UserType.PARENT:
-        user_type_text = "Родитель"
-
-    if user.type == UserType.APPLICANT:
-        user_type_text = "Абитуриент"
-
-    if user.type == UserType.OTHER:
-        user_type_text = "Другое"
 
     message_text = (
         f"✅ Вы взяли диалог с пользователем:\n"
         f"🆔 ID: {user.tg_id}\n"
         f"👤 Username: @{user.username or '—'}\n"
-        f"🎯 Тип: {user_type_text if user.type else 'Не выбран'}\n"
+        f"🎯 Тип: {user_type_text}\n"
         f"📘 Направление: {direction.name if direction else 'Не выбрано'}\n\n"
-        f"💬 Вопрос: {dialog.question}"
+        f"💬 Вопрос: {new_dialog.question}"
     )
+
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🔒 Закрыть диалог", callback_data=f"close_dialog_{new_dialog.id}")
 
     await callback.message.edit_text(
         message_text,
         reply_markup=builder.as_markup(),
     )
+    await callback.answer()
 
 
 
