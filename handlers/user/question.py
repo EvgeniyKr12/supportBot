@@ -1,8 +1,9 @@
 from aiogram import Bot, F, Router
-from aiogram.types import Message
-from sqlalchemy.orm import Session
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from sqlalchemy.orm import Session
+
 from data.state import UserDataForm
 from handlers.operator.operator import operator_response
 from keyboards.user.inlineKeyboard import InlineButtonText, choose_direction
@@ -26,10 +27,7 @@ def is_access(user):
 
 @router.message(F.text)
 async def handle_message(
-        message: Message,
-        bot: Bot,
-        db: Session,
-        state: FSMContext = None
+    message: Message, bot: Bot, db: Session, state: FSMContext = None
 ):
     # Проверяем, является ли отправитель оператором
     user_service = UserService(db)
@@ -48,7 +46,9 @@ async def handle_question(message: Message, bot: Bot, db: Session, state: FSMCon
     user = user_service.get_user(message.from_user.id)
 
     if user is None:
-        user = user_service.create_user(message.from_user.id, message.from_user.username)
+        user = user_service.create_user(
+            message.from_user.id, message.from_user.username
+        )
 
     if is_access(user):
         dialog_service = DialogService(db)
@@ -65,18 +65,24 @@ async def handle_question(message: Message, bot: Bot, db: Session, state: FSMCon
 
     if user.type is None:
         builder = InlineKeyboardBuilder()
-        builder.button(text="🎓 Абитуриент", callback_data=InlineButtonText.SET_APPLICANT)
-        builder.button(text="👨‍👩‍👧 Родитель", callback_data=InlineButtonText.SET_PARENT)
+        builder.button(
+            text="🎓 Абитуриент", callback_data=InlineButtonText.SET_APPLICANT
+        )
+        builder.button(
+            text="👨‍👩‍👧 Родитель", callback_data=InlineButtonText.SET_PARENT
+        )
         builder.button(text="❓ Другое", callback_data=InlineButtonText.SET_OTHER)
         builder.adjust(1)
-        await message.answer("Пожалуйста, выберите, кто вы:", reply_markup=builder.as_markup())
+        await message.answer(
+            "Пожалуйста, выберите, кто вы:", reply_markup=builder.as_markup()
+        )
         await state.set_state(UserDataForm.waiting_for_type)
         return
 
     if user.direction_id is None:
         await message.answer(
             "Пожалуйста, выберите направление обучения:",
-            reply_markup=await choose_direction(db)
+            reply_markup=await choose_direction(db),
         )
         await state.set_state(UserDataForm.waiting_for_direction)
         return
@@ -89,7 +95,9 @@ async def handle_question(message: Message, bot: Bot, db: Session, state: FSMCon
                 username=message.from_user.username,
                 question=message.text,
             )
-            await notify_admins(bot=bot, chat_id=message.chat.id, text=message.text, db=db)
+            await notify_admins(
+                bot=bot, chat_id=message.chat.id, text=message.text, db=db
+            )
         elif dialog.operator_id:
             await bot.send_message(
                 dialog.operator_id,

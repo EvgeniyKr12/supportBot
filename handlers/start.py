@@ -24,7 +24,9 @@ async def start(message: Message, db: Session):
     user = user_service.get_user(message.from_user.id)
 
     if user is None:
-        user = user_service.create_user(message.from_user.id, message.from_user.username)
+        user = user_service.create_user(
+            message.from_user.id, message.from_user.username
+        )
 
     if user.role != UserRole.USER:
         if user.role == UserRole.ADMIN:

@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.orm import Session
 
 from models import UserType
-from services import DialogService, UserService, DirectionService
+from services import DialogService, DirectionService, UserService
 from utils.logger import logger
 
 router = Router()
@@ -44,26 +44,31 @@ async def take_dialog(callback: CallbackQuery, bot, db: Session):
         try:
             await bot.send_message(
                 current_dialog.user_id,
-                "❌ Оператор переключился на другой диалог. Если вам нужна помощь, задайте новый вопрос."
+                "❌ Оператор переключился на другой диалог. Если вам нужна помощь, задайте новый вопрос.",
             )
         except Exception as e:
-            logger.error(f"Ошибка при уведомлении пользователя {current_dialog.user_id}: {e}")
+            logger.error(
+                f"Ошибка при уведомлении пользователя {current_dialog.user_id}: {e}"
+            )
 
     # 4. Назначаем новый диалог
     dialog_service.assign_operator(new_dialog.id, operator_id)
 
     # 5. Формируем информацию о пользователе
-    direction = direction_service.get_direction_by_id(user.direction_id) if user.direction_id else None
+    direction = (
+        direction_service.get_direction_by_id(user.direction_id)
+        if user.direction_id
+        else None
+    )
     user_type_text = {
         UserType.PARENT: "Родитель",
         UserType.APPLICANT: "Абитуриент",
-        UserType.OTHER: "Другое"
+        UserType.OTHER: "Другое",
     }.get(user.type, "Не выбран")
 
     # 6. Отправляем сообщения
     await bot.send_message(
-        user_id,
-        "👨💼 Оператор подключился к диалогу. Можете задавать вопросы!"
+        user_id, "👨💼 Оператор подключился к диалогу. Можете задавать вопросы!"
     )
 
     message_text = (
@@ -76,14 +81,15 @@ async def take_dialog(callback: CallbackQuery, bot, db: Session):
     )
 
     builder = InlineKeyboardBuilder()
-    builder.button(text="🔒 Закрыть диалог", callback_data=f"close_dialog_{new_dialog.id}")
+    builder.button(
+        text="🔒 Закрыть диалог", callback_data=f"close_dialog_{new_dialog.id}"
+    )
 
     await callback.message.edit_text(
         message_text,
         reply_markup=builder.as_markup(),
     )
     await callback.answer()
-
 
 
 @router.callback_query(F.data.startswith("close_dialog_"))

@@ -13,12 +13,20 @@ class UserService:
     def get_user(self, tg_id: int) -> Optional[User]:
         return self._get_user_by_tg_id(tg_id)
 
-    def get_user_by_username(self, username: str,) -> Optional[User]:
+    def get_user_by_username(
+        self,
+        username: str,
+    ) -> Optional[User]:
         stmt = select(User).where(User.username == username)
         result = self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-    def create_user(self, tg_id: int, username: str = None, role: UserRole = UserRole.USER,) -> User:
+    def create_user(
+        self,
+        tg_id: int,
+        username: str = None,
+        role: UserRole = UserRole.USER,
+    ) -> User:
         new_user = User(tg_id=tg_id, username=username, role=role)
         self.db.add(new_user)
         self.db.commit()

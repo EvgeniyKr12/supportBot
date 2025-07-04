@@ -1,9 +1,10 @@
 import asyncio
+
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.orm import Session
 
 from models import UserType
-from services import UserService, DirectionService
+from services import DirectionService, UserService
 
 
 async def notify_admins(bot, chat_id: int, text: str, db: Session):
@@ -20,7 +21,11 @@ async def notify_admins(bot, chat_id: int, text: str, db: Session):
     if not user:
         return
 
-    direction = direction_service.get_direction_by_id(user.direction_id) if user.direction_id else None
+    direction = (
+        direction_service.get_direction_by_id(user.direction_id)
+        if user.direction_id
+        else None
+    )
 
     if user.type == UserType.PARENT:
         user_type_text = "Родитель"
@@ -30,7 +35,6 @@ async def notify_admins(bot, chat_id: int, text: str, db: Session):
 
     if user.type == UserType.OTHER:
         user_type_text = "Другое"
-
 
     # Формируем текст с информацией о пользователе
     user_info = (

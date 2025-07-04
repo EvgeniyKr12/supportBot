@@ -1,6 +1,7 @@
 from aiogram import F, Router
 from aiogram.types import CallbackQuery
 from sqlalchemy.orm import Session
+
 from keyboards.user.inlineKeyboard import InlineButtonText, choose_direction
 from models.user import UserType
 from services import UserService
@@ -50,4 +51,6 @@ async def set_user_type(
         )
         return
     else:
-        await callback.message.answer(f"{response}\n\nТеперь вы можете задавать вопросы!")
+        await callback.message.answer(
+            f"{response}\n\nТеперь вы можете задавать вопросы!"
+        )

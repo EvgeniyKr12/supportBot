@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup
-
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+
 from keyboards.admin.base import build_list_inline_kb
 
 
@@ -20,6 +20,7 @@ def get_directions_list_kb(directions: list, action="show") -> InlineKeyboardMar
         callback_prefix=f"{action}_direction",
         back_callback="direction_management",
     )
+
 
 def get_about_user_inline_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
