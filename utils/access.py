@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from models import UserRole
 from services import UserService
+from utils.logger import logger
 
 
 async def check_super_admin_access(update: Union[CallbackQuery, Message], db: Session):
@@ -25,11 +26,7 @@ async def check_admin_access(update: Union[CallbackQuery, Message], db: Session)
     """Проверка прав администратора"""
     user_service = UserService(db)
     user = user_service.get_user(update.from_user.id)
-    if not user and user.role in (UserRole.ADMIN, UserRole.SUPER_ADMIN):
-        if isinstance(update, CallbackQuery):
-            await update.answer("❌ У вас нет доступа.")
-            await update.message.answer("❌ У вас нет доступа.")
-        else:
-            await update.answer("❌ У вас нет доступа.")
+    if not (user and user.role in (UserRole.ADMIN, UserRole.SUPER_ADMIN)):
+        logger.info(f"Пользователь с id: {user.id} не имеет доступа к функции")
         return False
     return True
