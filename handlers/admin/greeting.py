@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from config.constants import set_new_greeting
 from data.state import AdminStates
-from keyboards.admin.text import ButtonText
+from keyboards.admin.adminInterface import AdminInterfaceText
 from utils.access import check_admin_access
 from utils.logger import logger
 
@@ -16,7 +16,7 @@ router = Router()
 
 
 @router.callback_query(F.data == "change_greeting")
-@router.message(F.text == ButtonText.AdminMenu.CHANGE_GREETING)
+@router.message(F.text == AdminInterfaceText.AdminMenu.CHANGE_GREETING)
 @router.message(Command("change_greeting"))
 async def change_greeting_message(
     update: Union[CallbackQuery, Message], db: Session, state: FSMContext

@@ -114,7 +114,6 @@ async def close_dialog_handler(callback: CallbackQuery, bot, db: Session):
     )
 
 
-@router.message(F.text)
 async def operator_response(message: Message, bot: Bot, db: Session):
     try:
         logger.info(f"Оператор отвечает, сообщение: {message.text}")

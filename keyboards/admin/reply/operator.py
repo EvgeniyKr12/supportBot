@@ -1,13 +1,13 @@
-from keyboards.admin.base import build_reply_kb
-from keyboards.admin.text import ButtonText
+from keyboards.admin.adminInterface import AdminInterfaceText
+from keyboards.base import build_reply_kb
 
 
 def get_operator_management_kb():
     return build_reply_kb(
         [
-            [ButtonText.Operator.ADD, ButtonText.Operator.REMOVE],
-            [ButtonText.Operator.LIST],
-            [ButtonText.Operator.BACK],
+            [AdminInterfaceText.Operator.ADD, AdminInterfaceText.Operator.REMOVE],
+            [AdminInterfaceText.Operator.LIST],
+            [AdminInterfaceText.Operator.BACK],
         ],
         placeholder="Выберите действие с оператором 👇",
     )

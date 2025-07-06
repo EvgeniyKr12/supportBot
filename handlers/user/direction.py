@@ -1,34 +1,25 @@
 from aiogram import F, Router
-from aiogram.types import CallbackQuery
+from aiogram.exceptions import TelegramBadRequest
+from aiogram.types import (
+    CallbackQuery,
+)
 from sqlalchemy.orm import Session
 
-from keyboards.user.inlineKeyboard import choose_direction, confirm_direction_keyboard
+from keyboards.admin.inline.direction import (
+    get_direction_btn_list,
+)
 from services import DirectionService, UserService
 from utils.logger import logger
 
 router = Router()
 
 
-@router.callback_query(F.data.startswith("direction_info_"))
-async def show_direction_info(callback: CallbackQuery, db: Session):
-    logger.info("Информация о направлении")
-    direction_service = DirectionService(db)
-    code = callback.data.split("_")[2]
-    direction = direction_service.get_direction_by_code(code)
-    if not direction:
-        await callback.answer("❌ Направление не найдено")
-        return
-    info_text = direction_service.get_direction_info(direction)
-    await callback.message.edit_text(
-        info_text,
-        reply_markup=confirm_direction_keyboard(direction.code),
-        parse_mode="HTML",
-    )
-    await callback.answer()
-
-
+# Существующие обработчики (без изменений)
 @router.callback_query(F.data == "direction_UNDECIDED")
 async def direction_undecided(callback: CallbackQuery, db: Session):
+    logger.info(
+        f"Пользователь {callback.from_user.id} не определился с желаемым направлением"
+    )
     user_service = UserService(db)
     user = user_service.get_user(callback.from_user.id)
     user.direction_id = 0
@@ -46,8 +37,8 @@ async def confirm_direction(callback: CallbackQuery, db: Session):
     logger.info(f"Пользователь {callback.from_user.id} подтверждает направление")
     user_service = UserService(db)
     direction_service = DirectionService(db)
-    code = callback.data.split("_")[2]
-    direction = direction_service.get_direction_by_code(code)
+    name = callback.data.removeprefix("direction_confirm_")
+    direction = direction_service.get_direction_by_name(name)
     if not direction:
         await callback.answer("❌ Направление не найдено")
         return
@@ -64,7 +55,17 @@ async def confirm_direction(callback: CallbackQuery, db: Session):
 @router.callback_query(F.data == "direction_back")
 async def back_to_directions(callback: CallbackQuery, db: Session):
     logger.info("Пользователь возвращается назад")
-    await callback.message.edit_text(
-        "Выберите направление:", reply_markup=await choose_direction(db)
-    )
+    try:
+        direction_service = DirectionService(db)
+        directions = direction_service.get_all_directions()
+        await callback.message.edit_text(
+            "Выберите направление:",
+            reply_markup=await get_direction_btn_list(directions=directions),
+        )
+    except TelegramBadRequest as e:
+        if "message is not modified" in str(e):
+            # Игнорируем попытку редактирования без изменений
+            pass
+        else:
+            raise
     await callback.answer()

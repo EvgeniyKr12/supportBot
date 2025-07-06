@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 
 from data.state import UserDataForm
 from handlers.operator.operator import operator_response
-from keyboards.user.inlineKeyboard import InlineButtonText, choose_direction
+from keyboards.admin.inline.direction import get_direction_btn_list
+from keyboards.user.inline.user_type import UserTypeButtonText
 from models import UserRole
 from services import UserService
 from services.dialog_service import DialogService
@@ -35,8 +36,10 @@ async def handle_message(
 
     if message.from_user.id in [u.id for u in privileged_users]:
         # Если это оператор - вызываем operator_response
+        logger.info("Оператор отвечает")
         await operator_response(message, bot, db)
     else:
+        logger.info("Пользователь задает вопрос")
         # Если это обычный пользователь - вызываем handle_question
         await handle_question(message, bot, db, state)
 
@@ -66,12 +69,12 @@ async def handle_question(message: Message, bot: Bot, db: Session, state: FSMCon
     if user.type is None:
         builder = InlineKeyboardBuilder()
         builder.button(
-            text="🎓 Абитуриент", callback_data=InlineButtonText.SET_APPLICANT
+            text="🎓 Абитуриент", callback_data=UserTypeButtonText.SET_APPLICANT
         )
         builder.button(
-            text="👨‍👩‍👧 Родитель", callback_data=InlineButtonText.SET_PARENT
+            text="👨‍👩‍👧 Родитель", callback_data=UserTypeButtonText.SET_PARENT
         )
-        builder.button(text="❓ Другое", callback_data=InlineButtonText.SET_OTHER)
+        builder.button(text="❓ Другое", callback_data=UserTypeButtonText.SET_OTHER)
         builder.adjust(1)
         await message.answer(
             "Пожалуйста, выберите, кто вы:", reply_markup=builder.as_markup()
@@ -82,7 +85,7 @@ async def handle_question(message: Message, bot: Bot, db: Session, state: FSMCon
     if user.direction_id is None:
         await message.answer(
             "Пожалуйста, выберите направление обучения:",
-            reply_markup=await choose_direction(db),
+            reply_markup=await get_direction_btn_list(db),
         )
         await state.set_state(UserDataForm.waiting_for_direction)
         return

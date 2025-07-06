@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 
 from config.constants import load_questions, save_questions
 from data.state import AdminStates
+from keyboards.admin.adminInterface import AdminInterfaceText
 from keyboards.admin.reply.question import get_question_management_kb
-from keyboards.admin.text import ButtonText
 from utils.access import check_admin_access
 from utils.logger import logger
 
@@ -17,7 +17,7 @@ router = Router()
 
 
 @router.callback_query(F.data == "question_management")
-@router.message(F.text == ButtonText.AdminMenu.QUESTION_PANEL)
+@router.message(F.text == AdminInterfaceText.AdminMenu.QUESTION_PANEL)
 @router.message(Command("questions"))
 async def question_panel_handler(update: Union[CallbackQuery, Message], db: Session):
     logger.info("Управление вопросами")
@@ -33,8 +33,42 @@ async def question_panel_handler(update: Union[CallbackQuery, Message], db: Sess
         await update.answer()
 
 
+@router.message(F.text == AdminInterfaceText.Question.EDIT)
+async def edit_question_handler(
+    update: Union[CallbackQuery, Message], state: FSMContext, db: Session
+):
+    logger.info("Редактирование вопроса")
+    if not await check_admin_access(update, db):
+        return
+
+    message = update.message if isinstance(update, CallbackQuery) else update
+
+    try:
+        questions = load_questions()
+        if not questions:
+            await message.answer("ℹ️ В базе нет вопросов для редактирования.")
+            return
+
+        numbered_questions = list(questions.items())
+        text_list = "\n\n".join(
+            f"{i + 1}. ❓ {q}\n💬 {a}" for i, (q, a) in enumerate(numbered_questions)
+        )
+        await state.update_data(numbered_questions=numbered_questions)
+
+        await message.answer(
+            f"✏️ Выберите номер вопроса, который хотите изменить:\n\n{text_list}",
+            reply_markup=get_question_management_kb(),
+        )
+        await state.set_state(AdminStates.waiting_for_question_edit_selection)
+    except Exception as e:
+        await message.answer(f"❌ Ошибка загрузки: {str(e)}")
+
+    if isinstance(update, CallbackQuery):
+        await update.answer()
+
+
 @router.callback_query(F.data == "show_questions")
-@router.message(F.text == ButtonText.Question.LIST)
+@router.message(F.text == AdminInterfaceText.Question.LIST)
 @router.message(Command("list_questions"))
 async def show_questions_handler(update: Union[CallbackQuery, Message], db: Session):
     logger.info("Список вопросов")
@@ -64,7 +98,7 @@ async def show_questions_handler(update: Union[CallbackQuery, Message], db: Sess
 
 
 @router.callback_query(F.data == "add_question")
-@router.message(F.text == ButtonText.Question.ADD)
+@router.message(F.text == AdminInterfaceText.Question.ADD)
 @router.message(Command("add_question"))
 async def add_question_handler(
     update: Union[CallbackQuery, Message], state: FSMContext, db: Session
@@ -118,7 +152,7 @@ async def receive_answer_text(message: Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "remove_question")
-@router.message(F.text == ButtonText.Question.REMOVE)
+@router.message(F.text == AdminInterfaceText.Question.REMOVE)
 @router.message(Command("remove_question"))
 async def remove_question_handler(
     update: Union[CallbackQuery, Message], state: FSMContext, db: Session

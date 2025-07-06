@@ -7,8 +7,8 @@ from aiogram.types import CallbackQuery, Message
 from sqlalchemy.orm import Session
 
 from data.state import AdminStates
+from keyboards.admin.adminInterface import AdminInterfaceText
 from keyboards.admin.reply.admin import get_admin_management_kb
-from keyboards.admin.text import ButtonText
 from models import UserRole
 from services import UserService
 from utils.access import check_super_admin_access
@@ -18,7 +18,7 @@ router = Router()
 
 
 @router.callback_query(F.data == "admin_management")
-@router.message(F.text == ButtonText.AdminMenu.ADMIN_PANEL)
+@router.message(F.text == AdminInterfaceText.AdminMenu.ADMIN_PANEL)
 @router.message(Command("admin_management"))
 async def admin_panel_handler(update: Union[CallbackQuery, Message], db: Session):
     logger.info("Управление админами")
@@ -35,7 +35,7 @@ async def admin_panel_handler(update: Union[CallbackQuery, Message], db: Session
 
 
 @router.callback_query(F.data == "add_admin")
-@router.message(F.text == ButtonText.Admin.ADD)
+@router.message(F.text == AdminInterfaceText.Admin.ADD)
 @router.message(Command("add_admin"))
 async def add_admin_handler(
     update: Union[CallbackQuery, Message], state: FSMContext, db: Session
@@ -90,7 +90,7 @@ async def save_new_admin(message: Message, state: FSMContext, db: Session):
 
 
 @router.callback_query(F.data == "remove_admin")
-@router.message(F.text == ButtonText.Admin.REMOVE)
+@router.message(F.text == AdminInterfaceText.Admin.REMOVE)
 @router.message(Command("remove_admin"))
 async def remove_admin_handler(
     update: Union[CallbackQuery, Message], state: FSMContext, db: Session
@@ -157,7 +157,7 @@ async def remove_admin(message: Message, state: FSMContext, db: Session):
 
 
 @router.callback_query(F.data == "show_admins")
-@router.message(F.text == ButtonText.Admin.LIST)
+@router.message(F.text == AdminInterfaceText.Admin.LIST)
 @router.message(Command("list_admins"))
 async def list_admins_handler(update: Union[CallbackQuery, Message], db: Session):
     logger.info("Список админов")

@@ -7,8 +7,8 @@ from aiogram.types import CallbackQuery, Message
 from sqlalchemy.orm import Session
 
 from data.state import AdminStates
+from keyboards.admin.adminInterface import AdminInterfaceText
 from keyboards.admin.reply.operator import get_operator_management_kb
-from keyboards.admin.text import ButtonText
 from models import UserRole
 from services import UserService
 from utils.access import check_admin_access
@@ -18,7 +18,7 @@ router = Router()
 
 
 @router.callback_query(F.data == "operator_management")
-@router.message(F.text == ButtonText.AdminMenu.OPERATOR_PANEL)
+@router.message(F.text == AdminInterfaceText.AdminMenu.OPERATOR_PANEL)
 @router.message(Command("operators"))
 async def operator_panel_handler(update: Union[CallbackQuery, Message], db: Session):
     logger.info("Управление операторами")
@@ -35,7 +35,7 @@ async def operator_panel_handler(update: Union[CallbackQuery, Message], db: Sess
 
 
 @router.callback_query(F.data == "add_operator")
-@router.message(F.text == ButtonText.Operator.ADD)
+@router.message(F.text == AdminInterfaceText.Operator.ADD)
 @router.message(Command("add_operator"))
 async def add_operator_handler(
     update: Union[CallbackQuery, Message], db: Session, state: FSMContext
@@ -57,7 +57,7 @@ async def add_operator_handler(
 
 
 @router.callback_query(F.data == "remove_operator")
-@router.message(F.text == ButtonText.Operator.REMOVE)
+@router.message(F.text == AdminInterfaceText.Operator.REMOVE)
 @router.message(Command("remove_operator"))
 async def remove_operator_handler(
     update: Union[CallbackQuery, Message], db: Session, state: FSMContext
@@ -152,7 +152,7 @@ async def remove_operator(message: Message, state: FSMContext, db: Session):
 
 
 @router.callback_query(F.data == "show_operators")
-@router.message(F.text == ButtonText.Operator.LIST)
+@router.message(F.text == AdminInterfaceText.Operator.LIST)
 @router.message(Command("list_operators"))
 async def list_operators_handler(update: Union[CallbackQuery, Message], db: Session):
     logger.info("Список операторов")

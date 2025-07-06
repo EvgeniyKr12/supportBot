@@ -9,10 +9,23 @@ class DirectionService:
         self.db = db
 
     def create_direction(
-        self, name: str, code: str, exams: str, min_score: int, price: int
+        self,
+        name: str,
+        code: str,
+        exams: str,
+        budget: int,
+        commerce: int,
+        min_score: int,
+        price: int,
     ):
         direction = Direction(
-            name=name, code=code, exams=exams, min_score=min_score, price=price
+            name=name,
+            code=code,
+            exams=exams,
+            min_score=min_score,
+            price=price,
+            budget=budget,
+            commerce=commerce,
         )
         self.db.add(direction)
         self.db.commit()
@@ -21,30 +34,8 @@ class DirectionService:
     def get_all_directions(self):
         return self.db.query(Direction).all()
 
-    @staticmethod
-    def get_direction_info(direction: Direction) -> str:
-        """
-        Формирует информационное сообщение о направлении обучения в HTML-формате
-
-        :param direction: Объект направления из БД
-        :return: Форматированная строка с информацией
-        """
-        exams_list = ", ".join(exam.strip() for exam in direction.exams.split(','))
-
-        info_text = (
-            f"<b>🎓 {direction.name}</b> (<code>{direction.code}</code>)\n\n"
-            f"<b>📚 Необходимые экзамены:</b> {exams_list}\n"
-            f"<b>📊 Минимальный балл:</b> {direction.min_score}\n"
-            f"<b>💰 Стоимость обучения:</b> {direction.price:,} руб./год\n\n"
-            f"<i>Выберите '✅ Подтвердить' для выбора этого направления</i>"
-        ).replace(
-            ",", " "
-        )  # Замена обычной запятой на thin space в числах
-
-        return info_text
-
-    def get_direction_by_code(self, code):
-        stmt = select(Direction).where(Direction.code == code)
+    def get_direction_by_name(self, name: str):
+        stmt = select(Direction).where(Direction.name == name)
         result = self.db.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -58,3 +49,23 @@ class DirectionService:
             self.db.commit()
             return True
         return False
+
+    def update_direction(self, direction_id: int, **kwargs) -> bool:
+        """
+        Обновляет данные направления по его ID
+
+        :param direction_id: ID направления для обновления
+        :param kwargs: Параметры для обновления (name, code, exams, budget, commerce, min_score, price)
+        :return: True если обновление успешно, False если направление не найдено
+        """
+        direction = self.get_direction_by_id(direction_id)
+        if not direction:
+            return False
+
+        # Обновляем только переданные поля
+        for key, value in kwargs.items():
+            if hasattr(direction, key):
+                setattr(direction, key, value)
+
+        self.db.commit()
+        return True

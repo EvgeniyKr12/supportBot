@@ -6,9 +6,9 @@ from aiogram.types import CallbackQuery, Message
 from sqlalchemy.orm import Session
 
 from config.constants import load_greeting_text
+from keyboards.admin.adminInterface import AdminInterfaceText
 from keyboards.admin.reply.admin import get_manager_kb
-from keyboards.admin.text import ButtonText
-from keyboards.user.replyKeyboard import get_user_kb
+from keyboards.user.reply.user import get_user_kb
 from models import UserRole
 from services.user_service import UserService
 from utils.access import check_admin_access
@@ -45,8 +45,8 @@ async def start(message: Message, db: Session):
 
 
 @router.callback_query(F.data == "back")
-@router.message(F.text == ButtonText.Operator.BACK)
-@router.message(F.text == ButtonText.Admin.BACK)
+@router.message(F.text == AdminInterfaceText.Operator.BACK)
+@router.message(F.text == AdminInterfaceText.Admin.BACK)
 async def back_handler(update: Union[CallbackQuery, Message], db: Session):
     logger.info("Возврат назад")
     if not await check_admin_access(update, db):

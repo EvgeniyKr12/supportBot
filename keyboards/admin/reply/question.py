@@ -1,15 +1,15 @@
 from aiogram.types import ReplyKeyboardMarkup
 
-from keyboards.admin.base import build_reply_kb
-from keyboards.admin.text import ButtonText
+from keyboards.admin.adminInterface import AdminInterfaceText
+from keyboards.base import build_reply_kb
 
 
 def get_question_management_kb() -> ReplyKeyboardMarkup:
     return build_reply_kb(
         [
-            [ButtonText.Question.ADD, ButtonText.Question.REMOVE],
-            [ButtonText.Question.LIST],
-            [ButtonText.Question.BACK],
+            [AdminInterfaceText.Question.ADD, AdminInterfaceText.Question.REMOVE],
+            [AdminInterfaceText.Question.LIST, AdminInterfaceText.Question.EDIT],
+            [AdminInterfaceText.Question.BACK],
         ],
         placeholder="Выберите действие с вопросами 👇",
     )

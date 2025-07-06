@@ -2,7 +2,8 @@ from aiogram import F, Router
 from aiogram.types import CallbackQuery
 from sqlalchemy.orm import Session
 
-from keyboards.user.inlineKeyboard import InlineButtonText, choose_direction
+from keyboards.admin.inline.direction import get_direction_btn_list
+from keyboards.user.inline.user_type import UserTypeButtonText
 from models.user import UserType
 from services import UserService
 from utils.logger import logger
@@ -13,9 +14,9 @@ router = Router()
 @router.callback_query(
     F.data.in_(
         [
-            InlineButtonText.SET_APPLICANT,
-            InlineButtonText.SET_PARENT,
-            InlineButtonText.SET_OTHER,
+            UserTypeButtonText.SET_APPLICANT,
+            UserTypeButtonText.SET_PARENT,
+            UserTypeButtonText.SET_OTHER,
         ]
     )
 )
@@ -31,10 +32,10 @@ async def set_user_type(
         await callback.answer("❌ Пользователь не найден")
         return
 
-    if callback.data == InlineButtonText.SET_APPLICANT:
+    if callback.data == UserTypeButtonText.SET_APPLICANT:
         user.type = UserType.APPLICANT
         response = "✅ Вы выбрали статус: Абитуриент"
-    elif callback.data == InlineButtonText.SET_PARENT:
+    elif callback.data == UserTypeButtonText.SET_PARENT:
         user.type = UserType.PARENT
         response = "✅ Вы выбрали статус: Родитель"
     else:
@@ -47,7 +48,7 @@ async def set_user_type(
     if user.direction_id is None:
         await callback.message.answer(
             "Выберите направление обучения на которое хотите:",
-            reply_markup=await choose_direction(db),
+            reply_markup=await get_direction_btn_list(db),
         )
         return
     else:
